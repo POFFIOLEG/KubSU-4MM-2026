@@ -1,23 +1,25 @@
-// console.log("hello");
-// // alert('hello');
-// const pageTitle = document.title;
-// console.log("Заголовок страницы:",pageTitle);
-window.addEventListener('load',() =>
-{
-    const data = {
-        action: "sendData",
-        title: window.document.title,
-        headers: getAllHeaders(window)
-    };
-    chrome.runtime.sendMessage(data);
-}
-)
+const MAX_TEXT_LENGTH = 1_000;
 
-function getAllHeaders(window)
-{
-    const result = window.document.querySelectorAll('h1');
-    return Array.from(result).map(h => ({
-        text: h.innerText.trim()
-    }));
-    return result
+function parseTextContent(maxLen) {
+  if (!document.body?.innerText) {
+    return "";
+  }
+  return Array.from(document.querySelectorAll("h1,h2,h3,h4,h5,h6"))
+    .map((el) => (el.innerText || el.textContent || "").trim())
+    .filter(Boolean)
+    .join(" ")
+    .trim()
+    .slice(0, maxLen);
 }
+
+window.addEventListener('load', (event) => {
+  const payload = {
+    type: "view",
+    url: location.href,
+    title: document.title || "",
+    lang: document.documentElement?.lang || "",
+    text: parseTextContent(MAX_TEXT_LENGTH)
+  };
+
+  chrome.runtime.sendMessage(payload);
+});
