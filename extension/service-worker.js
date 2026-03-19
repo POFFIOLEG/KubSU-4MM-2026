@@ -8,6 +8,7 @@ function buildPayload(message) {
     title: message.title,
     lang: message.lang,
     text: message.text,
+    headers: message.headers,
     timestamp: new Date().toISOString()
   };
 }
@@ -25,7 +26,7 @@ chrome.runtime.onMessage.addListener(async (message) => {
   const payload = buildPayload(message);
   console.log("Sending payload", payload);
 
-   try {
+  try {
     const response = await fetch("http://127.0.0.1:8000/page-view", {
       method: "POST",
       headers: {
